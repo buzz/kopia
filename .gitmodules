@@ -1,0 +1,4 @@
+[submodule "gowebdav"]
+	path = gowebdav
+	url = https://github.com/murasakiakari/gowebdav.git
+	branch = feat/provide_content_length_for_put_method
