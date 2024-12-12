@@ -261,6 +261,20 @@ func isRetriable(err error) bool {
 func New(ctx context.Context, opts *Options, isCreate bool) (blob.Storage, error) {
 	cli := gowebdav.NewClient(opts.URL, opts.Username, opts.Password)
 
+	// Set Content-Length on PUT request: See #467
+	cli.SetInterceptor(func(method string, rq *http.Request) {
+		if method == "PUT" && rq.Body != nil {
+			b, err := io.ReadAll(rq.Body)
+			if err != nil {
+				panic(err)
+			}
+
+			rq.ContentLength = int64(len(b))
+
+			rq.Body = io.NopCloser(bytes.NewReader(b))
+		}
+	})
+
 	// Since we're handling encrypted data, there's no point compressing it server-side.
 	cli.SetHeader("Accept-Encoding", "identity")
 
